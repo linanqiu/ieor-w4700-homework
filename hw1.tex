@@ -1,0 +1,206 @@
+\documentclass[11pt]{scrartcl}
+\usepackage{dominatrix}
+\renewcommand\thesection{Problem \arabic{section}}
+\renewcommand\thesubsection{(\alph{subsection})}
+\renewcommand\thesubsubsection{(\roman{subsubsection})}
+\title{Homework 1}
+\subject{Intro to Financial Engineering IEOR W4700}
+\author{Linan Qiu\\\texttt{lq2137}}
+\begin{document}
+\maketitle
+
+\section{}
+
+If $S$ settles on $T+2$, then $P_{t+2} = 50$.
+
+Then, $P_{t+1} = \frac{P_{t+2}}{d}$ where $d$ is the discount factor for 1 month.
+
+$d = \left(1+\frac{r}{12}\right) = \left(1+\frac{0.1}{12}\right)$ due to annual compounding.
+
+Then, $P_{t+1} = \frac{50}{\left(1+\frac{0.1}{12}\right)} = 49.58678$
+
+I'd pay \$49.58678 for the stock.
+
+\section{}
+
+Recall that the Taylor series for $f(x)$ at $x = a$ is
+
+\[f(a) + \frac{f'(a)}{1!}(x-a) + \frac{f''(a)}{2!}(x-a)^2 + ... \]
+
+Applying this for $\log{1+x}$ function at $1 + x = 1$, $x = 0$ is
+
+\[0 + x - \frac{x^2}{2} + \frac{x^3}{3} + ...\]
+
+\begin{align*}
+(1+r)^n &= 2 \\
+n \log{(1+r)} &= \log 2 \\
+n \left(r - \frac{r^2}{2}\right) &= 0.69 \\
+\end{align*}
+
+Solving for $n$,
+
+\begin{align*}
+n &= \frac{0.69}{\left(r - \frac{r^2}{2}\right)} \\
+&= \frac{0.69}{r\left(1 - \frac{r}{2} \right)} \\
+&= \frac{0.69\left(1 + \frac{r}{2}\right)}{r \left(1 - \frac{r}{2}\right) \left(1 + \frac{r}{2}\right)} \\
+&\approx \frac{0.69\left(1+\frac{r}{2}\right)}{r} \\
+&= \frac{69(1+\frac{i}{200}}{i}
+\end{align*}
+
+The approximation that $\left(1-\frac{r}{2}\right)\left(1+\frac{r}{2}\right) = 1 - \frac{r^2}{4} \approx 1$ works because $r$ is assumed to be small (close to 0), hence $\frac{r^2}{4} \approx 0$
+
+\section{}
+
+Express both equations in terms of annual 365-day interest rate $r$:
+
+\begin{align*}
+r &= (1+\frac{y_{SB}}{2})^2 \\
+r &= (1+y_{AM}) \frac{360}{365}
+\end{align*}
+
+Then equating both,
+
+\begin{align*}
+(1+y_{AM}) &= \left(1 + \frac{y_{SB}}{2}\right)^2 \frac{365}{360}\\
+y_{AM} &= \left(1 + \frac{y_{SB}}{2}\right)^2 \frac{365}{360} - 1
+\end{align*}
+
+\section{}
+
+\subsection{}
+
+Let $R$ be the compound interest rate.
+
+\subsubsection{}
+
+\begin{align*}
+100(1+R)^N &= 100(1+rN) \\
+N \log{(1+R)} &= \log{(1+rN)} \\
+\log{(1+R)} &= \frac{\log{(1+0.05*10)}}{10} \\
+R &= \exp{\left(\frac{\log{(1+0.05*10)}}{10}\right)} - 1 = 0.04137974
+\end{align*}
+
+\subsubsection{}
+
+\begin{align*}
+100\left(1+\frac{R}{4}\right)^{4N} &= 100(1+rN) \\
+4N \log{\left(1+\frac{R}{4}\right)} &= \log{(1+rN)} \\
+\log{\left(1+\frac{R}{4}\right)} &= \frac{\log{(1+0.05*10)}}{40} \\
+R &= 4\left(\exp{\left(\frac{\log{(1+0.05*10)}}{40}\right)} - 1 \right)= 0.04075271
+\end{align*}
+
+\subsubsection{}
+
+\begin{align*}
+100\exp{(RN)} &= 100(1+rN) \\
+RN &= \log{(1+rN)} \\
+R &= \frac{\log{(1+rN)}}{N} = \frac{\log{(1+0.05*10)}}{10} = 0.04054651
+\end{align*}
+
+\subsection{}
+
+\begin{align*}
+N \log{(1+R)} &= \log{(1+rN)} \\
+R &= \exp{\left( \frac{\log{(1+rN)}}{N}\right)} - 1 \\
+&= (1+rN)^{\frac{1}{N}} - 1
+\end{align*}
+
+To find $\lim_{N \to \infty} (1+rN)^{\frac{1}{N}}$, we let $x = (1+rN)^{\frac{1}{N}}$. Then, $\log{x} = \frac{\log{(1+rN)}}{N}$. Now we apply L'hospital's rule:
+
+\[ \frac{d \log{(1+rN)}}{dN} = \frac{r}{1 + rN} \]
+\[ \frac{d N}{dN} = 1 \]
+
+Then,
+\[ \lim_{N \to \infty} \log{\left((1+rN)^{\frac{1}{N}}\right)} = \lim_{N \to \infty} \frac{r}{1 + rN} = 0\]
+\[ \lim_{N \to \infty} (1+rN)^{\frac{1}{N}} = \exp{0} = 1 \]
+\[ \lim_{N \to \infty} (1+rN)^{\frac{1}{N}} - 1 = 0 \]
+
+\section{}
+
+Solve by replication. 
+
+The forward contract at time $t$ with delivery price $K$ at time $T$ is$F(t, T, K)$. At expiration, payoff is $S(T) - K$.
+
+To replicate this, buy $\frac{S(t)}{1+b}$ of stock S, and borrow $\frac{K}{1+r}$ dollars. At expiration, I will have $S(T)$ of stocks and $K$ dollars to be returned, making my eventual position $S(T) - K$.
+
+Then, $F = \frac{S(t)}{1+b} - \frac{K}{1+r}$. To make the forward value 0, 
+
+\begin{align*}
+\frac{S(t)}{1+b} - \frac{K}{1+r} &= 0 \\
+K &= \frac{S(t)}{(1+r)}{(1+b)}
+\end{align*}
+
+\section{}
+
+The forward contract is still worth $S(T) - K$ at expiration.
+
+Now, each $S(t)$ entitles the holder to $D$ amount of dividend at time $T$. Then, buying $\frac{S(t)}{1+b}$ of stock in time $t$ will result in $\frac{D}{1+b}$ worth of dividend in time $T$. To offset that, borrow $\frac{D}{(1+b)(1+r)}$ worth of dollars in time $t$.
+
+Then, to replicate, buy $\frac{S(t)}{1+b}$ worth of stocks, borrow $\frac{K}{1+r} + \frac{D}{(1+r)(1+d)}$ dollars at time $t$. Then, at time $T$, this would be worth $S(T) - K$.
+
+Then the forward contract is worth $F = \frac{S(t)}{1+b} - \frac{K}{1+r} - \frac{D}{(1+b)(1+r)}$. Setting the forward contract to be value,
+
+\begin{align*}
+\frac{S(t)}{1+b} &= \frac{K}{1+r} + \frac{D}{(1+b)(1+r)} \\
+K &= \frac{1+r}{1+b}S(t) - \frac{D}{1+b}
+\end{align*}
+
+\section{}
+
+The forward contract pays $X(T) - K$ at time $T$, where $X(t)$ is the dollar-yen rate.
+
+\subsection{}
+
+At expiration, the forward contract pays $X(T) - K$.
+
+To replicate, buy $\frac{X(t)}{1+r_X}$ yen today for $X(t)$ and invest in Japan at rate $r_X$. At the same time, borrow $\frac{K}{1+r_{US}}$. At expiration time $T$, this position will be worth $X(T) - K$.
+
+Then, the forward contract at time $t$ is worth $F = \frac{X(t)}{1+r_X} - \frac{K}{1+r_{US}}$. To make the forward contract value 0,
+
+\begin{align*}
+\frac{X(t)}{1+r_X} &= \frac{K}{1+r_{US}} \\
+K &= \frac{1+r_{US}}{1+r_X}X(t)
+\end{align*}
+
+\subsection{}
+
+From the derivation process above, one can basically replicate the forward contract by 
+
+At time $t$,
+\begin{itemize}
+\item Buy $\frac{X(t)}{1+r_X}$ yen and earn yen money rate.
+\item Borrow $\frac{K}{1+r_{US}}$ dollars and pay dollar money rate.
+\end{itemize}
+making the whole position worth $\frac{X(t)}{1+r_X} - \frac{K}{1+r_{US}}$.
+
+At time $T$, the position will be worth $X(T) - K$. This combination replicates a forward contract for dollar-yen one year forward.
+
+\section{}
+
+Assuming borrowing cost $r = 0$ and 0 carry cost,
+
+\subsection{}
+
+Total profit $\pi$ is
+
+\[\pi = 1000*(70.50-68.30) = 2200\]
+
+\subsection{}
+
+\[\pi_{2015} = 1000 * (69.10 - 68.30) = 800\]
+
+\[\pi_{2016} = 1000 * (70.50 - 69.10) = 1400\]
+
+\section{}
+
+Since the company is Japanese, we calculate profits in \textyen.
+
+For contract 1, the forward contract buys \$1m with \textyen at rate $F_1$ \textyen/\$. Then, for \$1m, the company will pay $F_1$ \textyen and receive $S$ \textyen per \$. Hence, in \textyen, the company profits $(S - F_1)*1,000,000$ \textyen.
+
+For contract 2, the forward contract sells \$1m with \textyen at rate $F_2$ \textyen/\$. Then, for \$1m, the company will receive $F_2$ \textyen and pay $S$ \textyen per \$. Hence, in \textyen, the company profits $(F_2 - S)*1,000,000$ \textyen.
+
+The company's overall profits $\pi_{\yen} = 1,000,000 * (S-F_1 + F_2 - S) = 1,000,000 * (F_2 - F_1)$\textyen.
+
+The company is essentially making a curve (divergence between $F_1$ and $F_2$ bet instead of a directional bet, and the PnL is independent of the final spot rate $S$.
+
+\end{document}
