@@ -128,10 +128,52 @@ For 1 year, compare PV again:
 
 \section{}
 
+$x_K$ is the number of put options purchased whose strike price is $K$. Let $x_L$ is the number of put options purchased whose strike price is $L$. To arb this, find $x_K$ and $x_L$ such that
+
+\begin{align*}
+-P(t, T, K)x_K - P(t, T, L)x_L &\geq 0 \\
+\max\left[0, (K-S(T))\right]x_K + \max\left[0, (L-S(T))\right]x_L &\geq 0
+\end{align*}
+
+Both inequalities need to hold true (since one represents time $t$ and the other time of expiration $T$). Furthermore, one of the inequalities need to be strict (for us to be able to profit not just break even).
+
+The $\max$ notation is really annoying, so let's get rid of it by specifying ranges of $S(T)$.
+
 \begin{itemize}
-\item At expiration, $P(t, T, K)$ pays $\max{[0, K-S(T)]}$
-\item At expiration, $P(t, T, L)$ pays $\max{[0, L-S(T)]}$
+\item When $L < S(T)$
+
+$x_K$ and $x_L$ are 0, holding both inequalities true.
+
+\item When $K < S(T) < L$
+
+The two inequalities become:
+
+\begin{align*}
+-P(t, T, K)x_K - P(t, T, L)x_L &\geq 0 \\
+(L-S(T))x_L &\geq 0
+\end{align*}
+
+Then, $x_L \geq 0$ from the second inequality.
+
+\item When $S(T) < K$
+
+The two inequalities become:
+
+\begin{align*}
+-P(t, T, K)x_K - P(t, T, L)x_L &\geq 0 \\
+(K-S(T))x_K + (L-S(T))x_L &\geq 0
+\end{align*}
+
+From the first inequality, $x_K \leq \frac{-P(t, T, L)x_L}{P(t, T, K)}$
+
+From the second inequality, $x_K \geq \frac{-(L-S(T))x_L}{(K-S(T))}$. Then, we require that
+
+\[\frac{-(L-S(T))x_L}{(K-S(T))} \leq x_K \leq \frac{-P(t, T, L)x_L}{P(t, T, K)}\]
+
+Now if $\frac{P(t, T, L)}{P(t, T, K)} > \frac{L}{K}$, then $\frac{-P(t, T, L)}{P(t, T, K)} < \frac{-L}{K}$. Then, we can find a small $S(T)$ such that $\frac{-P(t, T, L)}{P(t, T, K)} < \frac{-(L-S(T))}{(K-S(T))}$. Then there would be no solution for $x_K$ from the above two inequalities.
 \end{itemize}
+
+Thus there is no arbitrage strategy.
 
 \section{}
 
@@ -175,11 +217,13 @@ Now,
 \item To calculate 2 year zero rate, $90 = \frac{100}{(1+r_2)^2}$, then $r_2 = 0.05409221$
 \end{itemize}
 
+We now have a yield curve for 2 years.
+
 Cashflow of the two-year bond can be stripped:
 
-\[PV = \frac{10}{1+r_1} + \frac{100 + 10}{1+r_2} = 113.8552\]
+\[PV = \frac{10}{1+r_1} + \frac{100 + 10}{(1+r_2)^2} = 108.5\]
 
-The fair value is $113.8552$
+The fair value is $108.5$
 
 \section{}
 
@@ -208,5 +252,103 @@ r_1 > r_2
 \end{align*}
 
 Hence project 1 will have a higher IRR than project 2.
+
+\section{}
+
+Monthly payment $A$ is
+
+\[203150 = \frac{A}{\left( \frac{0.08083}{12} \right)} \left(1 - \frac{1}{\left(1+\frac{0.0803}{12}\right)^{30*12}} \right)\]
+
+Solving for $A$, $A = 1504.76$.
+
+\begin{lstlisting}
+> f = function(a) {(a/(0.08083/12)) * (1-1/(1+0.0803/12)^360) - 203150}
+> uniroot(f, c(-99999999999, 99999999999))
+$root
+[1] 1504.76
+
+$f.root
+[1] 0.001216797
+
+$iter
+[1] 2
+
+$init.it
+[1] NA
+
+$estim.prec
+[1] 6.103516e-05
+\end{lstlisting}
+
+The principal that corresponds with $A$ and rate of $7.875\%$ is
+
+\[P = \frac{A}{\left( \frac{0.07875}{12} \right)} \left(1 - \frac{1}{\left(1+\frac{0.07875}{12}\right)^{30*12}} \right)\]
+
+Solving for $P$ using $A = 1504.76$, $P = 207533.3$.
+
+Then, total fee is $207533.3 - 203150 = 4383.3$.
+
+\section{}
+
+Coupon $C = 5\%$. Assume, without loss of generality, that the bond face value is $1$. Let yield $r = 2x$.
+
+After 5 years, the price of the bond should be 
+
+\[P = \frac{0.05}{x} \left(1 - \frac{1}{(1 + x)^{30}} \right) + \frac{1}{(1+x)^{30}}\]
+
+If the company exercises the call option, the company would have to pay $1.05$ per \$1 of bonds. That means $x$ would have to be such that $1.05 < P$ or
+
+\[1.05 < \frac{0.05}{x} \left(1 - \frac{1}{(1 + x)^{30}} \right) + \frac{1}{(1+x)^{30}}\]
+
+Solving for $x$, we get $x < 0.04686262$ or $r < 2x = 0.09372524$.
+
+\begin{lstlisting}
+> f = function(x) {(0.05/x)*(1-1/(1+x)^30) + 1/(1+x)^30 - 1.05}
+> uniroot(f, c(0.000000001,9999999999))
+$root
+[1] 0.04686262
+
+$f.root
+[1] 3.102862e-06
+
+$iter
+[1] 41
+
+$init.it
+[1] NA
+
+$estim.prec
+[1] 0.0001155707
+
+> x = uniroot(f, c(0.000000001,9999999999))
+> x = x$root
+> 2*x
+[1] 0.09372524
+\end{lstlisting}
+
+Yield rates would have to be less than $9.372524\%$
+
+\section{}
+
+Ten year bonds have semi-annual coupon payments. Let price of bond be $P$.
+
+\[P = \frac{4}{\frac{y}{2}} \left( 1 - \frac{1}{(1+\frac{y}{2})^{20}}\right) + \frac{100}{(1+\frac{y}{2})^{20}} = 87.53779\]
+
+Substituting in $y = 0.1$, 
+
+\[P = \frac{4}{0.05} \left( 1 - \frac{1}{1.05^{20}}\right) + \frac{100}{1.05^{20}} = 87.53779\]
+
+Calculating numerical derivative at $y = 0.1$, $\frac{d P}{d y} = -570.2769$. Then, modified duration
+
+\[D = \frac{1}{P}\frac{dP}{dy} = \frac{1}{87.53779}(-570.2769) = -6.514637\]
+
+\begin{lstlisting}
+> install.packages("numDeriv")
+> library(numDeriv)
+> f = function(y) {(4/(y/2)) * (1-1/(1+y/2)^20) + 100/(1+y/2)^20}
+> z = grad(f, y, method="Richardson")
+> z
+[1] -570.2769
+\end{lstlisting}
 
 \end{document}
