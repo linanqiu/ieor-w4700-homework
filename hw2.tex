@@ -257,18 +257,18 @@ Hence project 1 will have a higher IRR than project 2.
 
 Monthly payment $A$ is
 
-\[203150 = \frac{A}{\left( \frac{0.08083}{12} \right)} \left(1 - \frac{1}{\left(1+\frac{0.0803}{12}\right)^{30*12}} \right)\]
+\[203150 = \frac{A}{\left( \frac{0.08083}{12} \right)} \left(1 - \frac{1}{\left(1+\frac{0.08083}{12}\right)^{30*12}} \right)\]
 
 Solving for $A$, $A = 1504.76$.
 
 \begin{lstlisting}
-> f = function(a) {(a/(0.08083/12)) * (1-1/(1+0.0803/12)^360) - 203150}
+> f = function(a) {(a/(0.08083/12)) * (1-1/(1+0.08083/12)^360) - 203150}
 > uniroot(f, c(-99999999999, 99999999999))
 $root
-[1] 1504.76
+[1] 1502.414
 
 $f.root
-[1] 0.001216797
+[1] -7.888876e-05
 
 $iter
 [1] 2
@@ -284,9 +284,9 @@ The principal that corresponds with $A$ and rate of $7.875\%$ is
 
 \[P = \frac{A}{\left( \frac{0.07875}{12} \right)} \left(1 - \frac{1}{\left(1+\frac{0.07875}{12}\right)^{30*12}} \right)\]
 
-Solving for $P$ using $A = 1504.76$, $P = 207533.3$.
+Solving for $P$ using $A = 1502.414$, $P = 207209.7$.
 
-Then, total fee is $207533.3 - 203150 = 4383.3$.
+Then, total fee is $207209.7 - 203150 = 4059.7$.
 
 \section{}
 
@@ -340,7 +340,7 @@ Substituting in $y = 0.1$,
 
 Calculating numerical derivative at $y = 0.1$, $\frac{d P}{d y} = -570.2769$. Then, modified duration
 
-\[D = \frac{1}{P}\frac{dP}{dy} = \frac{1}{87.53779}(-570.2769) = -6.514637\]
+\[D = - \frac{1}{P}\frac{dP}{dy} = - \frac{1}{87.53779}(-570.2769) = 6.514637\]
 
 \begin{lstlisting}
 > install.packages("numDeriv")
