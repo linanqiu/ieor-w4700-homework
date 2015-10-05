@@ -346,36 +346,6 @@ D_A V_A + D_BV_B + D_CV_C + D_DV_D &= (2)(1512.287)
 
 \subsection{}
 
-We calculate the second derivative of each of the bond prices w.r.t yield.
-
-\begin{lstlisting}
-> p = function(r) {2000/((1+r)^2)}
-> library(numDeriv)
-> hessian(func=p, x=0.15)
-         [,1]
-[1,] 6861.039
-> pricea = function(r) {100/(1+r) + 100/((1+r)^2) + 1100/((1+r)^3)}
-> priceb = function(r) {50/(1+r) + 50/((1+r)^2) + 1050/((1+r)^3)}
-> pricec = function(r) {0/(1+r) + 0/((1+r)^2) + 1000/((1+r)^3)}
-> priced = function(r) {1000/(1+r) + 0/((1+r)^2) + 0/((1+r)^3)}
-> convexa = hessian(func=pricea, x=0.15)
-> convexb = hessian(func=priceb, x=0.15)
-> convexc = hessian(func=pricec, x=0.15)
-> convexd = hessian(func=priced, x=0.15)
-> convexa
-         [,1]
-[1,] 7037.288
-> convexb
-         [,1]
-[1,] 6501.704
-> convexc
-         [,1]
-[1,] 5966.121
-> convexd
-         [,1]
-[1,] 1315.032
-\end{lstlisting}
-
 Again, we use \textbf{Macaulay duration}. Then,
 
 \begin{align*}
@@ -414,6 +384,36 @@ No, since the PV of the bonds have to equal $1512.287$. However, since using bon
 At the same time, the best bond should be the one that matches the convexity of the \$2000 payment the closest. Using $\Gamma$ to denote convexity,
 
 \[\Gamma_A V_A + \Gamma_V V_B + \Gamma_C V_C + \Gamma_D V_D \approx (6861.039)(1512.287)\]
+
+We calculate the hessian of each of the bond prices w.r.t yield.
+
+\begin{lstlisting}
+> p = function(r) {2000/((1+r)^2)}
+> library(numDeriv)
+> hessian(func=p, x=0.15)
+         [,1]
+[1,] 6861.039
+> pricea = function(r) {100/(1+r) + 100/((1+r)^2) + 1100/((1+r)^3)}
+> priceb = function(r) {50/(1+r) + 50/((1+r)^2) + 1050/((1+r)^3)}
+> pricec = function(r) {0/(1+r) + 0/((1+r)^2) + 1000/((1+r)^3)}
+> priced = function(r) {1000/(1+r) + 0/((1+r)^2) + 0/((1+r)^3)}
+> convexa = hessian(func=pricea, x=0.15)
+> convexb = hessian(func=priceb, x=0.15)
+> convexc = hessian(func=pricec, x=0.15)
+> convexd = hessian(func=priced, x=0.15)
+> convexa
+         [,1]
+[1,] 7037.288
+> convexb
+         [,1]
+[1,] 6501.704
+> convexc
+         [,1]
+[1,] 5966.121
+> convexd
+         [,1]
+[1,] 1315.032
+\end{lstlisting}
 
 If we add that as a third condition, we have the set of three linear equations. We can use that to find the rref, which gives us
 
