@@ -42,5 +42,17 @@ qplot(results_inv, data=data, geom="histogram", binwidth=(max(results_inv) - min
 mean = s0 * exp(mu)
 sd = sigma * s0 * sqrt(1/n)
 
-mean_inv = (1/s0) * exp(-mu)
-sd_inv = sd
+mean_inv = (1/s0) * exp(sigma^2 - mu)
+sd_inv = sigma * (1/s0) * sqrt(1/n)
+
+# real values
+mean(results)
+mean
+sd(results)
+sd
+
+mean(results_inv)
+mean_inv
+sd(results_inv)
+sd_inv
+
