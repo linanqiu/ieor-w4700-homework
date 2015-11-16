@@ -11,6 +11,11 @@ language=R
 \newcommand{\portfolio}[2]{\ensuremath{\dfrac{K_3-K_2}{K_3-K_1}#1 + \dfrac{K_2-K_1}{K_3-K_1}#2}}
 \newcommand{\leftportfolio}[1]{\ensuremath{\dfrac{K_3-K_2}{K_3-K_1}#1}}
 
+\newcommand{\defrac}[2]{\ensuremath{\frac{\delta #1}{\delta #2}}}
+\newcommand{\dedefrac}[2]{\ensuremath{\frac{\delta^2 #1}{\delta #2^2}}}
+\newcommand{\dededefrac}[3]{\ensuremath{\frac{\delta^2 #1}{\delta #2 \delta #3}}}
+\renewcommand{\sf}{\ensuremath{Se^{(r-q)(T-t)}}}
+
 
 \title{Homework 7}
 \subject{Intro to Financial Engineering IEOR W4700}
@@ -187,6 +192,189 @@ $price
 [1] 7.222809
 \end{lstlisting}
 
+Code is available at \url{https://github.com/linanqiu/ieor-w4700-homework/blob/master/hw7/modified-binomial.R}
+
+\section{}
+
+\subsection{}
+
+\[dS = \mu S dt + \sigma S dZ\]
+
+Using Ito's lemma, we can show that when $L = \log{S}$,
+
+\[dL = \left(\mu - \frac{\sigma^2}{2}\right)dt + \sigma dZ\]
+
+L follows a generalized Wiener process with constant drift rate $\mu - \frac{\sigma^2}{2}$ and variance $\sigma^2$. Change in $L$ between time $t$ and time $T$ is hence normally distributed. Hence,
+
+\[L_T - L_t \sim N\left[\left(\mu-\frac{\sigma^2}{2}\right)(T-t), \; \sigma^2(T-t)\right]\]
+
+\[L_T \sim N\left[\left(\mu-\frac{\sigma^2}{2}\right)(T-t) + L_t, \; \sigma^2(T-t)\right]\]
+
+Since the value of the derivative is the expected riskless discounted value of the terminal payoff, and that the expected value of the terminal payoff is $\left(\mu-\frac{\sigma^2}{2}\right)(T-t) + L_t$ where $L_t = \log{S(t)}$, then,
+
+\[L(S(t), t) = \exp{(-r(T-t))}\left[ \left(\mu-\frac{\sigma^2}{2}\right)(T-t) + \log{S(t)}\right]\]
+
+\subsection{}
+
+\[f = \exp{(-r(T-t))}\left[ \left(\mu-\frac{\sigma^2}{2}\right)(T-t) + \log{S(t)}\right]\]
+
+Black-Scholes-Merton PDE states that
+
+\[\defrac{f}{t} + rS \defrac{f}{S} + \frac{1}{2}\sigma^2 S^2 \dedefrac{f}{S} = rf\]
+
+To verify,
+
+\begin{align*}
+\defrac{f}{t} &= \exp{(-r(T-t))}r\left[\left(\mu-\frac{\sigma^2}{2}\right)(T-t) + \log{S(t)}\right] + \exp{(-r(T-t))}\left[-\left(\mu-\frac{\sigma^2}{2}\right)\right] \\
+&= \exp{(-r(T-t))}\left(r\left[\left(\mu-\frac{\sigma^2}{2}\right)(T-t) + \log{S(t)}\right] - \left(\mu-\frac{\sigma^2}{2}\right)\right) \\
+\defrac{f}{S} &= \frac{\exp{(-r(T-t))}}{S} \\
+\dedefrac{f}{S} &= -\frac{\exp{(-r(T-t))}}{S^2}
+\end{align*}
+
+Then,
+
+\begin{align*}
+&\defrac{f}{t} + rS \defrac{f}{S} + \frac{1}{2}\sigma^2 S^2 \dedefrac{f}{S} \\
+&= \exp{(-r(T-t))}\left(r\left[\left(\mu-\frac{\sigma^2}{2}\right)(T-t) + \log{S(t)}\right] - \left(\mu-\frac{\sigma^2}{2}\right)\right) \\
+&\;\;\;\;+ rS\frac{\exp{(-r(T-t))}}{S} - \frac{1}{2}\sigma^2S^2\frac{\exp{(-r(T-t))}}{S^2} \\
+&= r \exp{(-r(T-t))}\left[ \left(\mu-\frac{\sigma^2}{2}\right)(T-t) + \log{S(t)}\right] \\
+&= rf
+\end{align*}
+
+$f$ satisfies the Black-Scholes-Merton PDE.
+
+\section{}
+
+Black-Scholes-Merton formula for European call is
+
+\[c = S_0N(d_1) - Ke^{-rT}N(d_2)\]
+
+where
+
+\begin{align*}
+d_1 &= \frac{\log{(S_0 / K)} + (r+\sigma^2/2)T}{\sigma\sqrt{T}} \\
+d_2 &= \frac{\log{(S_0 / K)} + (r-\sigma^2/2)T}{\sigma\sqrt{T}} = d_1 - \sigma\sqrt{T}
+\end{align*}
+
+Furthermore, an European option on a stock with known dividends can be treated as a riskless component that corresponds to the known dividends during the life of the option and a risky component. The value of the riskless component is simply the present value of the dividends.
+
+Encoding these into functions,
+
+\begin{lstlisting}
+dividend_pv = function(dividends, times, r) {
+  discount_factors = exp(-r*times)
+  return(sum(dividends*discount_factors))
+}
+
+d1 = function(S, K, r, sigma, T) {
+  return((log(S/K) + (r+(sigma^2)/2)*T)/(sigma*sqrt(T)))
+}
+
+d2 = function(S, K, r, sigma, T) {
+  return(d1(S, K, r, sigma, T) - sigma*sqrt(T))
+}
+
+bsm_call = function(S, K, r, sigma, T, dividends, times) {
+  if(hasArg(dividends) && hasArg(times)) {
+    S = S - dividend_pv(dividends=dividends, times=times, r=r)
+  }
+  d1_val = d1(S, K, r, sigma, T)
+  d2_val = d2(S, K, r, sigma, T)
+  if(hasArg(dividends) && hasArg(times)) {
+    return(list(price=S*pnorm(d1_val) - K*exp(-r*T)*pnorm(d2_val), d1=d1_val, d2=d2_val, dividend_pv=dividend_pv(dividends=dividends, times=times, r=r)))
+  } else {
+    return(list(price=S*pnorm(d1_val) - K*exp(-r*T)*pnorm(d2_val), d1=d1_val, d2=d2_val))
+  }
+}
+
+bsm_put = function(S, K, r, sigma, T, dividends, times) {
+  if(hasArg(dividends) && hasArg(times)) {
+    S = S - dividend_pv(dividends=dividends, times=times, r=r)
+  }
+  d1_val = d1(S, K, r, sigma, T)
+  d2_val = d2(S, K, r, sigma, T)
+  if(hasArg(dividends) && hasArg(times)) {
+    return(list(price=K*exp(-r*T)*pnorm(-d2_val) - S*pnorm(-d1_val), d1=d1_val, d2=d2_val, dividend_pv=dividend_pv(dividends=dividends, times=times, r=r)))
+  } else {
+    return(list(price=K*exp(-r*T)*pnorm(-d2_val) - S*pnorm(-d1_val), d1=d1_val, d2=d2_val))
+  }
+}
+
+bsm_call(S=80, K=70, r=0.05, sigma=0.30, T=8/12, dividends=c(2,2), times=c(1/4, 1/2))
+\end{lstlisting}
+
+Then,
+
+\begin{lstlisting}
+> bsm_call(S=80, K=70, r=0.05, sigma=0.30, T=8/12, dividends=c(2,2), times=c(1/4, 1/2))
+$price
+[1] 11.96573
+
+$d1
+[1] 0.598278
+
+$d2
+[1] 0.3533291
+
+$dividend_pv
+[1] 3.925775
+\end{lstlisting}
+
+\section{}
+
+Black-Scholes-Merton formula for European call is
+
+\begin{align*}
+c &= Se^{-q(T-t)}N(d_1) - Ke^{-r(T-t)}N(d_2) \\
+&= e^{-r(T-t)}\left(Se^{(r-q)(T-t)}N(d_1) - KN(d_2) \right)
+\end{align*}
+
+where
+
+\begin{align*}
+d_1 &= \frac{\log{(Se^{(r-q)(T-t)} / K)} + (r+\sigma^2/2)(T-t)}{\sigma\sqrt{T-t}} \\
+d_2 &= \frac{\log{(Se^{(r-q)(T-t)} / K)} + (r-\sigma^2/2)(T-t)}{\sigma\sqrt{T-t}} = d_1 - \sigma\sqrt{T-t}
+\end{align*}
+
+\[\defrac{C}{S} = e^{-r(T-t)}\left(e^{(r-q)(T-t)}N(d_1) + Se^{(r-q)(T-t)}\defrac{N(d_1)}{S}\defrac{d_1}{S} - K\defrac{N(d_2)}{S}\defrac{d_2}{S} \right)\]
+
+
+By definition of cumulative normal distribution function,
+
+\begin{align*}
+N(x) &= \frac{1}{\sqrt{2\pi}}\int_{-\infty}^x e^{-y^2/2} dy \\
+\defrac{N(x)}{x} &= \frac{e^{-x^2/2}}{\sqrt{2\pi}}
+\end{align*}
+
+\begin{align*}
+\defrac{N(d_1)}{d_1} &= \frac{1}{\sqrt{2\pi}}e^{-(d_1)^2/2} \\
+&= \frac{1}{\sqrt{2\pi}}e^{-\frac{(\log{(\sf/K)} + \frac{\sigma^2(T-t)}{2})^2}{2\sigma^2(T-t)}} \\
+&= \frac{1}{\sqrt{2\pi}}e^{-\frac{(\log{\sf/K})^2}{2\sigma^2(T-t)}}e^{-\frac{-\sigma^2(T-t)}{8}} e^{-\frac{\log{\sf/K}}{2}} \\
+\defrac{N(d_2)}{d_2} &= \frac{1}{\sqrt{2\pi}}e^{-(d_2)^2/2} \\
+&= \frac{1}{\sqrt{2\pi}}e^{-\frac{(\log{(\sf/K)} - \frac{\sigma^2(T-t)}{2})^2}{2\sigma^2(T-t)}} \\
+&= \frac{1}{\sqrt{2\pi}}e^{-\frac{(\log{\sf/K})^2}{2\sigma^2(T-t)}}e^{-\frac{-\sigma^2(T-t)}{8}} e^{\frac{\log{\sf/K}}{2}} \\
+\end{align*}
+
+Then,
+
+\[\defrac{N(d_2)}{d_2} = \defrac{N(d_1)}{d_1} e^{\log{\sf/K}}\]
+
+\[\defrac{N(d_2)}{d_2} = \defrac{N(d_1)}{d_1} \frac{\sf}{K}\]
+
+\[K\defrac{N(d_2)}{d_2} = \sf\defrac{N(d_1)}{d_1}\]
+
+By the Black-Scholes-Merton formula,
+
+\begin{align*}
+\defrac{d_1}{S} &= 1/S\sigma\sqrt{T-t} \\
+\defrac{d_2}{S} &= 1/S\sigma\sqrt{T-t} = \defrac{d_1}{S}
+\end{align*}
+
+\begin{align*}
+\defrac{C}{S} &= e^{-r(T-t)}\left(e^{(r-q)(T-t)}N(d_1) + Se^{(r-q)(T-t)}\defrac{N(d_1)}{S}\defrac{d_1}{S} - K\defrac{N(d_2)}{S}\defrac{d_2}{S} \right) \\
+&=e^{-r(T-t)}\left(e^{(r-q)(T-t)}N(d_1) \right) \\
+&= e^{-q(T-t)}N(d_1)
+\end{align*}
 
 
 \end{document}
