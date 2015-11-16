@@ -1,0 +1,192 @@
+\documentclass[11pt]{scrartcl}
+\usepackage{dominatrix}
+\usepackage{solarized-light}
+\lstset{
+language=R
+}
+\renewcommand\thesection{Problem \arabic{section}}
+\renewcommand\thesubsection{\thesection (\alph{subsection})}
+\renewcommand\thesubsubsection{(\roman{subsubsection})}
+
+\newcommand{\portfolio}[2]{\ensuremath{\dfrac{K_3-K_2}{K_3-K_1}#1 + \dfrac{K_2-K_1}{K_3-K_1}#2}}
+\newcommand{\leftportfolio}[1]{\ensuremath{\dfrac{K_3-K_2}{K_3-K_1}#1}}
+
+
+\title{Homework 7}
+\subject{Intro to Financial Engineering IEOR W4700}
+\author{Linan Qiu\\\texttt{lq2137}}
+\begin{document}
+\maketitle
+
+\section{}
+
+\begin{table}[H] \centering 
+\begin{tabu}{ccccc} 
+\toprule
+$S_T$ & $C(K_1)$ & $C(K_2)$ & $C(K_3)$ & $\portfolio{C(K_1)}{C(K_3)}$\\[0.1ex] \\
+\midrule
+$S_T < K_1$ & 0 & 0 & 0 & 0\\[0.1ex] \\
+$K_1 < S_T < K_2$ & $S_T - K_1$ & 0 & 0 & $\leftportfolio{(S_T - K_1)}$\\[0.1ex] \\
+$K_2 < S_T < K_3$ & $S_T - K_1$ & $S_T - K_2$ & 0 & $\leftportfolio{(S_T - K_1)}$\\[0.1ex] \\
+$S_T > K_3$ & $S_T - K_1$ & $S_T - K_2$ & $S_T - K_3$ & $\portfolio{(S_T - K_1)}{(S_T - K_3)}$\\[0.1ex] \\
+\bottomrule
+\end{tabu} 
+  \caption{Payoff at expiration} 
+  \label{table:payoff} 
+\end{table}
+
+Let $P = \portfolio{C(K_1)}{C(K_3)}$
+
+Now consider at expiration,
+
+\begin{itemize}
+\item When $S_T < K_1$, all values 0.
+
+Then, $P = C(K_2)$
+
+\item When $K_1 < S_T < K_2$, $\leftportfolio{(S-K_1)} > 0 = C(K_2)$. 
+
+Then, $P > C(K_2)$
+
+\item When $K_2 < S_T < K_3$, consider boundary values:
+
+When $S_T = K_2$,
+
+\[P = \leftportfolio{(K_2 - K_1)} > 0 = C(K_2)\]
+
+\[P > C(K_2)\]
+
+When $S_T = K_3$,
+
+\[P = \leftportfolio{(K_3 - K_1)} = K_3 - K_2 = C(K_2)\]
+
+\[P = C(K_2)\]
+
+Then, $P \geq C(K_2)$
+
+\item When $S>K_3$, let $x$ be any value greater than $K_3$
+
+\begin{align*}
+P &= \portfolio{(x-K_1)}{(x-K_3)} \\
+&= \frac{K_3x + K_2K_1 - K_2K_3 - K_1x}{K_3 - K_1} \\
+&= \frac{(K_3-K_1)(x-K_2)}{K_3-K_1} \\
+&= x - K_2
+\end{align*}
+
+\[C(K_2) = x-K_2\]
+
+Then, $P = C(K_2)$
+\end{itemize}
+
+Hence, for all terminal values, $P \geq C(K_2)$. Hence in the absence of riskless arbitrage, $P \geq C(K_2)$. Otherwise, one can risklessly profit by longing $P$ and shorting $C(K_2)$ and earning a riskless profit at expiration $T$.
+
+\section{}
+
+I modified the binomial tree program from the previous homework to reflect the new derivative. The major change in the code is in the binomial option portion:
+
+\begin{lstlisting}
+value_binomial_option = function(tree, sigma, delta_t, r, X, type) {
+  q = q_prob(r, delta_t, sigma)
+  
+  N = nrow(tree) - 1
+  
+  option_tree = matrix(0, nrow=1, ncol=2^N)
+  probabilities = matrix(0, nrow=1, ncol=2^N)
+  
+  u = exp(sigma*sqrt(delta_t))
+  d = exp(-sigma*sqrt(delta_t))
+  
+  grid = expand.grid(rep(list(c(u, d)), N))
+  qs = expand.grid(rep(list(c(q, 1-q)), N))
+        
+  for(i in 1 : 2^N) {
+    S = tree[1,1]
+    sum = S
+    q_prob = 1
+    for(j in 1 : N) {
+      S = S * grid[i, j]
+      q_prob = q_prob * qs[i, j]
+      sum = sum + S
+    }
+    option_tree[1, i] = max(sum / (N+1) - tree[1,1], 0)
+    probabilities[1, i] = q_prob
+  }
+    
+  return(list(option_tree=option_tree, probabilities=probabilities, updown=grid, qs=qs))
+}
+\end{lstlisting}
+
+Essentially, given a \texttt{tree} representing the stock tree as shown directly below, we can generate all permutations of possible paths and calculate the expiration values along those paths as well as the probabilities of those paths. The price of the option is then the expected termination value discounted at the riskless rate. A breakdown of this procedure is described below:
+
+First, the stock price evolution is calculated:
+
+\begin{lstlisting}
+$stock
+          [,1]      [,2] [,3]  [,4]
+[1,] 100.00000   0.00000    0   0.0
+[2,]  83.33333 120.00000    0   0.0
+[3,]  69.44444 100.00000  144   0.0
+[4,]  57.87037  83.33333  120 172.8
+\end{lstlisting}
+
+Then, given that number of periods $= 3$, all permutations of $uuu$ $uud$ ... $ddd$ can be generated using \texttt{expand.grid}
+
+\begin{lstlisting}
+$option$updown
+       Var1      Var2      Var3
+1 1.2000000 1.2000000 1.2000000
+2 0.8333333 1.2000000 1.2000000
+3 1.2000000 0.8333333 1.2000000
+4 0.8333333 0.8333333 1.2000000
+5 1.2000000 1.2000000 0.8333333
+6 0.8333333 1.2000000 0.8333333
+7 1.2000000 0.8333333 0.8333333
+8 0.8333333 0.8333333 0.8333333
+\end{lstlisting}
+
+Similarly, each of the corresponding risk-neutral probabilities $qqq$ $qq(1-q)$ ... $(1-q)^3$ can be generated as well.
+
+\begin{lstlisting}
+$option$qs
+      Var1     Var2     Var3
+1 0.468216 0.468216 0.468216
+2 0.531784 0.468216 0.468216
+3 0.468216 0.531784 0.468216
+4 0.531784 0.531784 0.468216
+5 0.468216 0.468216 0.531784
+6 0.531784 0.468216 0.531784
+7 0.468216 0.531784 0.531784
+8 0.531784 0.531784 0.531784
+\end{lstlisting}
+
+Using these, we can calculate the value of the option at expiration:
+
+\begin{lstlisting}
+$payoffs
+[1] 34.2000000  0.8333333 10.0000000  0.0000000 21.0000000  0.0000000  0.8333333  0.0000000
+\end{lstlisting}
+
+and their associated probabilities
+
+\begin{lstlisting}
+$probabilities
+[1] 0.1026452 0.1165810 0.1165810 0.1324088 0.1165810 0.1324088 0.1324088 0.1503855
+\end{lstlisting}
+
+The discount rate, which is the riskless discount rate $\exp{-rT}$ can be calculated as well setting $r=0.06$ and $T=\frac{1}{4}$
+
+\begin{lstlisting}
+$discount
+[1] 0.9851119
+\end{lstlisting}
+
+Then, the price of the option is the expected expiration value discounted risklessly. This gives us
+
+\begin{lstlisting}
+$price
+[1] 7.222809
+\end{lstlisting}
+
+
+
+\end{document}

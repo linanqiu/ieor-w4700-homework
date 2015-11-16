@@ -1,4 +1,4 @@
-source('binomial.R')
+binomial_option(type='put', sigma=0.33, T=1/4, r=0.05, X=48, S=50, N=3)source('binomial.R')
 
 option = binomial_option(type='put', sigma=0.33, T=1/4, r=0.05, X=48, S=50, N=3)
 

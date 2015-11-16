@@ -1,7 +1,7 @@
 library(parallel)
 cl = makeCluster(8)
 clusterEvalQ(cl, source('binomial.R'))
-periods = seq(100, 1000)
+periods = seq(100, 500)
 periods = sample(periods)
 valuesPar = parSapply(cl=cl, periods, option_price_vary_period)
 data = as.data.frame(list(periods=periods, values=valuesPar))

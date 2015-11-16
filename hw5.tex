@@ -79,8 +79,9 @@ Then by Ito's Lemma, and omitting higher powers of $dt$,
 \begin{align*}
 dG &= YdX + XdY + dXdY \\
 &= YX(\mu_X dt + \sigma_XdW) + XY(\mu_Y dt + \sigma_YdW) + XY(\mu_Xdt +\sigma_XdW)(\mu_Ydt + \sigma_YdW) \\
-&= XY(\mu_X + \mu_Y)dt + XY(\sigma_X + \sigma_Y + \sigma_X\sigma_Y)dW \\
-&= G(\mu_X + \mu_Y)dt + G(\sigma_X + \sigma_Y + \sigma_X\sigma_Y)dW
+&= XY(\mu_X + \mu_Y)dt + XY(\sigma_X + \sigma_Y)dW + XY(\sigma_X\sigma_Y)(dW)^2 \\
+&= XY(\mu_X + \mu_Y)dt + XY(\sigma_X + \sigma_Y)dW + XY(\sigma_X\sigma_Y)dt \\
+&= G(\mu_X + \mu_Y + \sigma_X\sigma_Y)dt + G(\sigma_X + \sigma_Y)dW
 \end{align*}
 
 This is a GBM with drift = $\mu_x + \mu_Y$ and variance $(\sigma_X + \sigma_Y + \sigma_X\sigma_Y)^2$
@@ -90,7 +91,7 @@ This is a GBM with drift = $\mu_x + \mu_Y$ and variance $(\sigma_X + \sigma_Y + 
 Let stock A be $A$ and stock B be $B$
 
 \begin{align*}
-dA &= \mu_A Adt + \sigma_A A dZ
+dA &= \mu_A Adt + \sigma_A A dZ \\
 dB &= \mu_B Bdt + \sigma_B B dZ
 \end{align*}
 
@@ -129,15 +130,15 @@ dG &= \dfrac{G}{t}dt + \dfrac{G}{x}dX + \dfrac{G}{y}dY + \frac{1}{2}\ddfrac{G}{x
 &= YdX + XdY + dXdY \\
 &= YX(\mux dt + \six dZ) + XY(\muy dt + \siy dW) + XY(\mux dt + \six dZ)(\muy dt + \siy dW) \\
 &= XY(\mux + \muy)dt + XY(\six dZ + \siy dW) +  XY\six \siy dZdW \\
-&= G(\mux + \muy)dt + G(\six dZ + \siy dW) + G\rho dt \\
-&= G(\mux + \muy + \rho)dt + G(\six dZ + \siy dW)
+&= G(\mux + \muy)dt + G(\six dZ + \siy dW) + G\six \siy \rho dt \\
+&= G(\mux + \muy + \six\siy\rho)dt + G(\six dZ + \siy dW)
 \end{align*}
 
-\[dG = G(\mux + \muy + \rho)dt + G(\six dZ + \siy dW) = G(\mux + \muy + \rho)dt + GdA\]
+\[dG = G(\mux + \muy + \six\siy\rho)dt + G(\six dZ + \siy dW) = G(\mux + \muy + \six\siy\rho)dt + GdA\]
 
-Let $dA = \six dZ + \siy dW$. Now $E(dA) = 0$, $Var(dA) = (\six^2 + \siy^2) dt$, and $SD(dA) = \sqrt{\six^2 + \siy^2} \sqrt{dt}$ hence $dA$ is also a Wiener process.
+Let $dA = \six dZ + \siy dW$. Now $E(dA) = 0$, $Var(dA) = (\six^2 + \siy^2 + 2\rho\six\siy) dt$, and $SD(dA) = \sqrt{\six^2 + \siy^2 + 2\rho\six\siy} \sqrt{dt}$ hence $dA$ is also a Wiener process.
 
-Then, $dG$ is a GBM with drift $\mux + \muy + \rho$ and variance rate $(\six^2 + \siy^2)$.
+Then, $dG$ is a GBM with drift $\mux + \muy + \six\siy\rho$ and variance rate $(\six^2 + \siy^2 + 2\rho\six\siy)$.
 
 \section{}
 
